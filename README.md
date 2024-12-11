@@ -1,5 +1,7 @@
 ## Project setup
 
+Make sure you have Node.js and NPM installed.
+
 ```
 npm install
 ```
