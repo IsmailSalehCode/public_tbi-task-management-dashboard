@@ -21,6 +21,23 @@ export default {
     AppBar,
     AppFooter,
   },
+  mounted() {
+    window.addEventListener("keydown", this.navigateRouterHistory);
+  },
+  beforeUnmount() {
+    window.removeEventListener("keydown", this.navigateRouterHistory);
+  },
+  methods: {
+    navigateRouterHistory(event) {
+      if (event.key === "ArrowLeft") {
+        // console.log("back");
+        this.$router.go(-1);
+      } else if (event.key === "ArrowRight") {
+        // console.log("forward");
+        this.$router.go(1);
+      }
+    },
+  },
 };
 </script>
 
