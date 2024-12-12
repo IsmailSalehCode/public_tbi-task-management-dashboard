@@ -5,7 +5,7 @@
       <input type="time" v-model="timeInput" />
     </div>
     <div v-if="modelValue" class="datetime-display">
-      {{ formattedDateTime }}
+      {{ locale.toUpperCase() }} formatted: {{ formattedDateTime }}
     </div>
   </div>
 </template>
@@ -20,14 +20,14 @@ export default {
     return {
       dateInput: "",
       timeInput: "",
+      locale: import.meta.env.VITE_LOCALE || "bg",
     };
   },
   computed: {
     formattedDateTime() {
-      const locale = import.meta.env.VITE_LOCALE || "bg";
       if (!this.modelValue) return "";
       const date = new Date(this.modelValue);
-      return date.toLocaleString(locale, {
+      return date.toLocaleString(this.locale, {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
