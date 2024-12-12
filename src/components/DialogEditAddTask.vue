@@ -119,8 +119,6 @@ export default {
       } else {
         this.componentModeIsAdd = false;
         this.task = Object.assign({}, entity);
-        // DatetimePicker expects a date object for the model value
-        this.task.dueDate = new Date(this.task.dueDate);
       }
       this.dialog = true;
     },
@@ -134,7 +132,7 @@ export default {
           title: "",
           description: "",
           status: 1,
-          dueDate: new Date(Date.now()),
+          dueDate: Date.now(),
         },
         componentModeIsAdd: true,
         rules: rules,

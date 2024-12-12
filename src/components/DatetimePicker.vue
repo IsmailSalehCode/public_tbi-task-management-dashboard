@@ -25,10 +25,11 @@ export default {
     formattedModelValue() {
       let res;
       if (this.modelValue) {
+        const date = new Date(this.modelValue);
         res =
           this.logLocale.toUpperCase() +
           " formatted: " +
-          this.modelValue.toLocaleString(this.logLocale, {
+          date.toLocaleString(this.logLocale, {
             year: "2-digit",
             month: "2-digit",
             day: "2-digit",
@@ -44,15 +45,19 @@ export default {
   },
   data() {
     return {
-      inputDate: this.modelValue ? this.formatDate(this.modelValue) : "",
-      inputTime: this.modelValue ? this.formatTime(this.modelValue) : "",
+      inputDate: this.modelValue
+        ? this.formatDate(new Date(this.modelValue))
+        : "",
+      inputTime: this.modelValue
+        ? this.formatTime(new Date(this.modelValue))
+        : "",
     };
   },
   emits: ["update:modelValue"],
   props: {
     modelValue: {
-      type: Date,
-      default: new Date().setSeconds(0, 0),
+      type: [Number, Date],
+      default: () => new Date().setSeconds(0, 0),
     },
     loading: {
       type: Boolean,
@@ -69,9 +74,10 @@ export default {
   },
   watch: {
     modelValue(newValue) {
-      if (newValue instanceof Date) {
-        this.inputDate = this.formatDate(newValue);
-        this.inputTime = this.formatTime(newValue);
+      const date = new Date(newValue);
+      if (date instanceof Date && !isNaN(date)) {
+        this.inputDate = this.formatDate(date);
+        this.inputTime = this.formatTime(date);
       }
     },
     inputDate() {
@@ -105,11 +111,13 @@ export default {
         0,
         0
       );
-      this.$emit("update:modelValue", updatedDateTime);
+
+      this.$emit("update:modelValue", updatedDateTime.getTime());
     },
   },
 };
 </script>
+
 <style scoped>
 input {
   border-bottom: solid gray 1px;
