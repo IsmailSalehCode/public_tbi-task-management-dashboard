@@ -141,7 +141,18 @@ export default {
       this.$router.push(`/task/${item.internalItem.raw.id}`);
     },
     canDescriptionBeExpanded(txt) {
-      return txt.length > this.maxDescrChars;
+      if (txt.length <= this.maxDescrChars) {
+        return false;
+      }
+
+      if (txt.length - 1 <= this.maxDescrChars) {
+        const punctuationMarks = [".", "?", "!"];
+        if (punctuationMarks.includes(txt.charAt(txt.length - 1))) {
+          return false;
+        }
+      }
+
+      return true;
     },
     truncateStr(str) {
       return str.substring(0, this.maxDescrChars) + "...";
