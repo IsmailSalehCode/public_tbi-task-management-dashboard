@@ -1,128 +1,101 @@
 <template>
-  <v-col style="text-align: center">
-    <v-row no-gutters justify="center">
-      <v-col style="font-weight: bold" cols="12" sm="2" class="my-auto">
-        {{ label }}
-      </v-col>
-      <v-col style="min-width: fit-content; max-width: 130px" cols="6" sm="5">
-        <input max-width="170px" type="date" v-model="inputDate" />
-      </v-col>
-      <v-col style="min-width: fit-content; max-width: 130px" cols="4" sm="5">
-        <input max-width="130px" type="time" v-model="inputTime" />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col class="pt-0 font-italic text-caption" cols="12">
-        {{ formattedModelValue }}
-      </v-col>
-    </v-row>
-  </v-col>
+  <div class="datetime-picker">
+    <div class="datetime-inputs">
+      <input type="date" v-model="dateInput" />
+      <input type="time" v-model="timeInput" />
+    </div>
+    <div v-if="modelValue" class="datetime-display">
+      {{ formattedDateTime }}
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-  computed: {
-    formattedModelValue() {
-      let res;
-      if (this.modelValue) {
-        const date = new Date(this.modelValue);
-        res =
-          this.logLocale.toUpperCase() +
-          " formatted: " +
-          date.toLocaleString(this.logLocale, {
-            year: "2-digit",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          });
-      } else {
-        res = "None ...";
-      }
-      return res;
-    },
-  },
-  data() {
-    return {
-      inputDate: this.modelValue
-        ? this.formatDate(new Date(this.modelValue))
-        : "",
-      inputTime: this.modelValue
-        ? this.formatTime(new Date(this.modelValue))
-        : "",
-    };
+  props: {
+    modelValue: [Number, Date],
   },
   emits: ["update:modelValue"],
-  props: {
-    modelValue: {
-      type: [Number, Date],
-      default: () => new Date().setSeconds(0, 0),
-    },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-    label: {
-      type: String,
-      default: "Select a DateTime",
-    },
-    logLocale: {
-      type: String,
-      default: "bg",
+  data() {
+    return {
+      dateInput: "",
+      timeInput: "",
+    };
+  },
+  computed: {
+    formattedDateTime() {
+      const locale = import.meta.env.VITE_LOCALE || "bg";
+      if (!this.modelValue) return "";
+      const date = new Date(this.modelValue);
+      return date.toLocaleString(locale, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
     },
   },
   watch: {
-    modelValue(newValue) {
-      const date = new Date(newValue);
-      if (date instanceof Date && !isNaN(date)) {
-        this.inputDate = this.formatDate(date);
-        this.inputTime = this.formatTime(date);
-      }
+    modelValue: {
+      immediate: true,
+      handler(value) {
+        if (value) {
+          const date = new Date(value);
+          this.dateInput = this.formatDate(date);
+          this.timeInput = this.formatTime(date);
+        }
+      },
     },
-    inputDate() {
-      this.updateAndEmitDateTime();
+    dateInput() {
+      this.updateDateTime();
     },
-    inputTime() {
-      this.updateAndEmitDateTime();
+    timeInput() {
+      this.updateDateTime();
     },
   },
   methods: {
     formatDate(date) {
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      const day = date.getDate().toString().padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      return date.toISOString().split("T")[0];
     },
     formatTime(date) {
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-      return `${hours}:${minutes}`;
+      return date.toTimeString().slice(0, 5);
     },
-    updateAndEmitDateTime() {
-      const [year, month, day] = this.inputDate.split("-").map(Number);
-      const [hours, minutes] = this.inputTime.split(":").map(Number);
-      const updatedDateTime = new Date(
-        year,
-        month - 1,
-        day,
-        hours,
-        minutes,
-        0,
-        0
-      );
+    updateDateTime() {
+      if (!this.dateInput || !this.timeInput) return;
 
-      this.$emit("update:modelValue", updatedDateTime.getTime());
+      const [year, month, day] = this.dateInput.split("-").map(Number);
+      const [hours, minutes] = this.timeInput.split(":").map(Number);
+
+      const newDateTime = new Date(year, month - 1, day, hours, minutes);
+      this.$emit("update:modelValue", newDateTime.getTime());
     },
   },
 };
 </script>
 
 <style scoped>
-input {
-  border-bottom: solid gray 1px;
+.datetime-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
-input:hover {
-  border-bottom: solid black 1px;
+
+.datetime-inputs {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.datetime-display {
+  color: #666;
+  font-style: italic;
 }
 </style>
